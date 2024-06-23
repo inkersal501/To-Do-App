@@ -6,11 +6,74 @@ body{
     background: linear-gradient(to left,  #4481eb 0%, #04befe 100%); 
 }
 .cols{
-    max-height: 40vh;
+    max-height: 100vh;
     height: auto;
 }
 .table-wrapper{
     height: 40vh !important; 
     overflow-y: scroll;
 }
-footer{position: fixed;bottom: 0;left: 45vw;}
+.accordion-button::after{
+    background-image: inherit;
+    font-family: 'bootstrap-icons';
+    content: "\F4FA";
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #fff;
+}
+.accordion-button:not(.collapsed)::after{
+    font-family: 'bootstrap-icons';
+    content: "\F2E6";
+    background-image: inherit;
+    font-size: 1.5rem;
+    transform:inherit;
+    transition: .4s ease-in-out !important;
+    font-weight: 500;
+}
+.floating-btn{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background:linear-gradient(to left,  #4481eb 0%, #04befe 100%);
+}
+.card{
+    border:inherit;    
+    z-index: 100;       
+}
+.accordion-button,.accordion-item,.card{
+    background-color: inherit; 
+}
+.accordion-item{
+    border-color:rgba(255, 255, 255, 0.15);
+}
+.accordion-button[aria-expanded="true"]{
+    background-color: inherit;
+}
+.accordion-button::before{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    width: 0%;
+    height: 2px;
+    background-color: #fff;
+    transition: .5s all;
+}
+.accordion-button[aria-expanded="true"]::before{
+    width: 100%;
+    transition: .5s all;
+}
+.accordion-button:focus{
+    box-shadow: none;
+}
+.tooltip1 span {
+    display:none;
+}
+.tooltip1:hover span {
+    display:block;
+    position:fixed;
+    overflow:hidden;
+}

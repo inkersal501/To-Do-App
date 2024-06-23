@@ -1,74 +1,107 @@
- 
-        let todoForm=document.getElementById('to-do-form');
-        let filter=document.getElementById('filterDate');
-        let clearFilters=document.getElementById('clearFilters');
+let todoForm=document.getElementById('to-do-form');
 
-        let tasks=JSON.parse(localStorage.getItem("todo")) || [];
+let tasks=JSON.parse(localStorage.getItem("todo")) || [];
 
-        todoForm.addEventListener("submit",(e)=>{
-            e.preventDefault();
-            let date=new Date(todoForm.elements['date'].value);
-            let note=todoForm.elements['todo'].value;
-            let remarks=todoForm.elements['remarks'].value;
-            let obj={date,note,remarks}; 
-            tasks.push(obj); 
-            localStorage.setItem("todo",JSON.stringify(tasks));            
-            document.getElementById('success-alert').style.display='block';  
-            setTimeout(()=>{
-                document.getElementById('success-alert').style.display='none';  
-            },3000);
-            todoForm.elements['date'].value='';
-            todoForm.elements['todo'].value='';
-            todoForm.elements['remarks'].value='';
-            LoadTasks(tasks);          
-        });
+todoForm.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    let date=new Date(todoForm.elements['date'].value).toLocaleDateString("en-IN",);
+    let note=todoForm.elements['todo'].value;
+    let remarks=todoForm.elements['remarks'].value;
+    let obj={date,note,remarks}; 
+    tasks.push(obj); 
+    localStorage.setItem("todo",JSON.stringify(tasks));
+    document.getElementById('success-alert').style.display='block';  
+    setTimeout(()=>{
+        document.getElementById('success-alert').style.display='none';  
+    },1000);
+    todoForm.elements['date'].value='';
+    todoForm.elements['todo'].value='';
+    todoForm.elements['remarks'].value='';
+    LoadTasks(tasks);
+});
 
-        filter.addEventListener("change",(e)=>{
-            e.preventDefault();
-            let filterDate=new Date(e.target.value).toLocaleDateString();
-            let filteredData=tasks.filter((data)=>{
-                let date=new Date(data.date);
-                if(date.toLocaleDateString()==filterDate){
-                    return true;
-                }
-            });
-            LoadTasks(filteredData);  
-        });
-        clearFilters.addEventListener("click",()=>{
-            LoadTasks(tasks); 
-            filter.value=''; 
-        });
-        function UpdateTable(obj,index){
-            let tbody=document.getElementById('todo-note-body');
-            let tr=document.createElement('tr');
-            let date=new Date(obj.date);
-            tr.innerHTML=`
-            <td class="text-center">${index+1}</td>
-            <td>${date.toLocaleDateString()}</td>
-            <td>${obj.note}</td>
-            <td>${obj.remarks || ""}</td>
-            <td class="text-center"><a href="javascript:void(0);" class="btn btn-outline-danger" Onclick="RemoveTasks(${index});"><i class="bi bi-trash3"></i></a></td>`;
-            tbody.appendChild(tr);
+function filterData(filterDate,tasks){             
+    let filteredData=tasks.filter((data)=>{
+        if(data.date==filterDate){
+            return true;
         }
+    });
+    return filteredData;
+}          
+
+function LoadTasks(tasks) {             
+            
+    if(tasks.length>0){
+
+        document.getElementById('todo-note-body').innerHTML='';
+        let set = new Set();                
+        tasks.forEach(element => {
+            set.add(element.date);
+        });
+        let arr=[];
+        for (const i of set) {
+            arr.push(i);
+        }
+        arr.sort((a,b) =>{
+            const dateA = new Date(a.split('/').reverse().join('-'));
+            const dateB = new Date(b.split('/').reverse().join('-'));
+            return dateA - dateB;
+        });
+        let newArr=[...arr];
+        let obj={};
+        // console.log(newArr);
+        arr.forEach(element => {
+            obj[element]=filterData(element,tasks);
+            LoadHTMLDOM(element,obj[element]); 
+        });
+        // console.log(obj);               
+    }else{
+        document.getElementById('todo-note-body').innerHTML=`
+        <h4 class="text-center p-4 mt-5 mb-3 text-secondary">0 Lists to Display</h4>
+        `;
+    }
+
+}
+function LoadHTMLDOM(id,data){
+
+    // console.log(id,data);
+    let AccordionId=id.split("/").join("");
+    let tbody=document.getElementById('todo-note-body');
+    let AccordionItem=document.createElement('div');
+    AccordionItem.className="accordion-item"; 
+
+    let ul=`<ul style="list-style-type:none;" class="text-white">`;            
+    data.forEach(element => { 
+        ul += `<li class="animate__animated animate__fadeInUp mt-2 mb-2">
+        <i class="bi bi-lightning-charge-fill mx-2 text-white"></i>
+        <span>${element.note}</span>
+        <span class="mx-2"><small>${element.remarks || ""}</small></span>
+        </li>`;              
+    });  
+    ul +=`<ul>`;   
+    AccordionItem.innerHTML=` 
         
-        function LoadTasks(tasks) {             
-                    
-            if(tasks.length>0){
-                document.getElementById('todo-note-table').style.display="";
-                document.getElementById('todo-note-body').innerHTML='';
-                tasks.forEach((element,index)=> { 
-                    UpdateTable(element,index);
-                });
-            }else{
-                document.getElementById('todo-note-table').style.display="none";
-            }
+    <h2 class="accordion-header">
+    <button class="accordion-button collapsed text-white" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse${AccordionId}" aria-expanded="false" aria-controls="flush-collapse${AccordionId}">
+        ${id}
+    </button>
+    </h2>
+    <div id="flush-collapse${AccordionId}" class="accordion-collapse collapse" data-bs-parent="#todo-note-body">
+        <div class="accordion-body" id="accordion-body-${AccordionId}">
+            ${ul}
+        </div>
+    </div>`;
+    tbody.appendChild(AccordionItem);   
+}
 
-        }
-        function RemoveTasks(i){ 
-            tasks.splice(i,1);
-            localStorage.setItem("todo",JSON.stringify(tasks)); 
-            LoadTasks(tasks);
-        }
-        document.addEventListener('DOMContentLoaded',()=>{
-            LoadTasks(tasks);
-        }); 
+document.addEventListener('DOMContentLoaded',()=>{
+    LoadTasks(tasks);
+});
+var tooltipSpan = document.getElementById('tooltip-span');
+
+window.onmousemove = function (e) {
+    var x = e.clientX,
+        y = e.clientY;
+    tooltipSpan.style.top = (y + 20) + 'px';
+    tooltipSpan.style.left = (x + 20) + 'px';
+};
